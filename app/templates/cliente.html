@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+  <form method= 'POST'>
+          <div>
+            <label>Nome:</label>
+            <input name="nome" type="text" required>
+          </div>
+          <div>
+            <label>Senha:</label>
+            <input name="senha" type="password" required>
+          </div>
+          <div>
+            <label>Email:</label>
+            <input name="email" type="email" placeholder="nome@email.com" required>
+          </div>
+          <div>
+            <label>CPF:</label>
+            <input type="text" name="cpf">
+          </div>
+          <div style="float: right;">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+  </form>
+{% endblock %}

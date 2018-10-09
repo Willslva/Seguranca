@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+ <form method= 'POST'>
+        <div>
+          <label>Remetente:</label>
+          <input name="remetente" type="email" placeholder="nome@email.com"  required>
+        </div>
+        <div>
+          <label>Destinatario:</label>
+            <input name="destinatario" type="email" placeholder="nome@email.com" required>
+        </div>
+        <div>
+          <label>mensagem:</label>
+          <input type="text" name="mensagem" required>
+        </div>
+        <div style="float: right;">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+  </form>
+{% endblock %}

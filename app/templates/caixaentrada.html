@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+          <div style="float: center;">
+          <h1> Histórico de Mensagens</h1>
+          {% for x in caixa %}
+              <table border="3">
+                <tr>
+                  <th>remetente</th>
+                  <th>destinatario</th>
+                  <th>mensagem</th>
+                </tr>
+                <tr>
+                   <td>{{ x['remetente']}}</td>
+                   <td>{{ x['destinatario']}}</td>
+                   <td>{{ x['mensagem']}}</td>
+                </tr>
+              </table>
+            {% endfor %}
+          </div>
+              
+
+{% endblock %}
