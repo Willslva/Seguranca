@@ -47,6 +47,8 @@ def caixadeentrada():
 	cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cur.execute("SELECT * FROM Mensagem")
 	lista_mensagens = cur.fetchall()
+	mensagens = lista_mensagens.encode()
+
 	return render_template('caixaentrada.html', caixa=lista_mensagens)
 
 @app.route('/escrever', methods=['GET', 'POST'])
@@ -60,14 +62,17 @@ def escrever():
 		t.execute("SELECT chavpublic FROM Public where email= '%s';"%(destinatario))
 		x = t.fetchall()
 		t.close()
-		print (x)
-		'''
+		keypublic = (x[0][0])
 		final = b64decode(keypublic)
 		chave_publica = RSA.importKey(final)
-		mensagem = encrypt(mensagemdestino, chave_publica)
-		'''
+		resultado = encrypt(mensagemdestino.encode(), chave_publica)
+		conn = psycopg2.connect('dbname=usuario user=postgres password=flasknao host=127.0.0.1')
+		cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+		cur.execute("INSERT INTO Mensagem (remetente,destinatario,mensagem) VALUES ('%s','%s','%s')"%(remetente,destinatario,b64encode(resultado).decode()))
+		conn.commit()
+		cur.close()
+		return render_template('escrevercliente.html')
 	return render_template('escrevercliente.html')
-
 @app.route('/cliente', methods=['GET', 'POST'])
 def cliente():
 	if (request.method == 'POST'):
