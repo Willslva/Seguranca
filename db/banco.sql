@@ -9,7 +9,7 @@ CREATE TABLE cliente (
 CREATE TABLE Mensagem (
 	remetente varchar(255) NOT NULL,
 	destinatario varchar(255) NOT NULL,
-	mensagem varchar(255) NOT NULL
+	mensagem text NOT NULL
 );
 
 

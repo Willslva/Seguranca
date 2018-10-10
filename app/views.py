@@ -20,7 +20,6 @@ def geradorChaves(tamanho_chave):
 	public = key.publickey()
 	return public, private
 
-chave_publica, chave_privada = geradorChaves(2048)
 
 def encrypt(mensagem, chave_publica):
 	#RSA - implementação PKCS#1 OAEP
@@ -57,12 +56,11 @@ def escrever():
 		publi = psycopg2.connect('dbname=public user=postgres password=flasknao host=127.0.0.1')
 		t = publi.cursor(cursor_factory=psycopg2.extras.DictCursor)
 		t.execute("SELECT chavpublic FROM Public where email= '%s';"%(destinatario))
-		x = t.fetchone()
-		while x is not None:
-			return (x[0])
+		x = t.fetchall()
 		t.close()
-
-
+		keypublic = x[0][0]
+		final = b64decode(keypublic)
+		return RSA.importKey(final)
 	return render_template('escrevercliente.html')
 
 @app.route('/cliente', methods=['GET', 'POST'])
@@ -73,17 +71,21 @@ def cliente():
 		senha = request.form['senha']
 		email = request.form['email']
 		cpf = request.form['cpf']
+		x = chave_publica.exportKey('DER')
+		chavefinalpublic = b64encode(x).decode()
+		y = chave_privada.exportKey('DER')
+		chavefinalprivat = b64encode(y).decode()
 		cur.execute("INSERT INTO cliente (nome,senha,email,cpf) VALUES ('%s','%s','%s', %s)"%(nome,senha,email,cpf))
 		conn.commit()
 		cur.close()
 		publi = psycopg2.connect('dbname=public user=postgres password=flasknao host=127.0.0.1')
 		t = publi.cursor(cursor_factory=psycopg2.extras.DictCursor)
-		t.execute("INSERT INTO Public (nome,email,chavpublic) VALUES ('%s','%s','%s')"%(nome,email,chave_publica))
+		t.execute("INSERT INTO Public (nome,email,chavpublic) VALUES ('%s','%s','%s')"%(nome,email,chavefinalpublic))
 		publi.commit()
 		t.close()
 		priv = psycopg2.connect('dbname=privat user=postgres password=flasknao host=127.0.0.1')
 		e = priv.cursor(cursor_factory=psycopg2.extras.DictCursor)
-		e.execute("INSERT INTO Private (nome,email,chavprivat) VALUES ('%s','%s','%s')"%(nome,email,chave_privada))
+		e.execute("INSERT INTO Private (nome,email,chavprivat) VALUES ('%s','%s','%s')"%(nome,email,chavefinalprivat))
 		priv.commit()
 		e.close()
 		return render_template('cliente.html')
