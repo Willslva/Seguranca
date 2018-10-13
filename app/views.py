@@ -10,6 +10,9 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Signature import PKCS1_v1_5
 from Crypto import Random
 from base64 import b64encode, b64decode
+
+
+
 def geradorChaves(tamanho_chave):
 	#2048
 	random_generator = Random.new().read
@@ -36,7 +39,9 @@ def decrypt(mensagem, chave_privada):
 @app.route('/')
 def home():
 	return render_template('home.html')
-
+@app.route('/homecliente')
+def homecliente():
+	return render_template('homecliente.html')
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
 	return render_template('homecadastro.html')
@@ -45,21 +50,25 @@ def cadastro():
 def caixadeentrada():
 	conn = psycopg2.connect('dbname=usuario user=postgres password=flasknao host=127.0.0.1')
 	cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-	cur.execute("SELECT mensagem FROM Mensagem where destinatario='w@gmail.com'")
+	cur.execute("SELECT mensagem FROM Mensagem where destinatario='%s';"%str(session['name']))
 	lista_mensagens = cur.fetchall()
-	mensagem = (lista_mensagens[0][0])
+	mensagem =(lista_mensagens[-1][-1])
+	cur.close()
+	cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+	cur.execute("SELECT remetente FROM Mensagem where destinatario='%s';"%str(session['name']))
+	lista_remetente = cur.fetchall()
+	remetente =(lista_remetente[-1][-1])
 	cur.close()
 	priv = psycopg2.connect('dbname=private user=postgres password=flasknao host=127.0.0.1')
 	e = priv.cursor(cursor_factory=psycopg2.extras.DictCursor)
-	e.execute("SELECT chavprivat FROM Private where email= 'w@gmail.com'")
+	e.execute("SELECT chavprivat FROM Private where email='%s';" %str(session['name']))
 	x = e.fetchall()
 	e.close()
 	keyprivate = (x[0][0])
 	final = b64decode(keyprivate)
 	chave_privada = RSA.importKey(final)
-	descriptografada = decrypt(mensagem, chave_privada)
-	print(mensagem_descriptografada.decode())
-	return render_template('caixaentrada.html')
+	descriptografada = decrypt(b64decode(mensagem), chave_privada)
+	return render_template('caixaentrada.html', caixa=descriptografada.decode(), remetente=remetente)
 
 @app.route('/escrever', methods=['GET', 'POST'])
 def escrever():
@@ -75,6 +84,7 @@ def escrever():
 		keypublic = (x[0][0])
 		final = b64decode(keypublic)
 		chave_publica = RSA.importKey(final)
+		print (mensagemdestino)
 		resultado = encrypt(mensagemdestino.encode(), chave_publica)
 		conn = psycopg2.connect('dbname=usuario user=postgres password=flasknao host=127.0.0.1')
 		cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -115,6 +125,7 @@ def cliente():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	
 	if (request.method == 'POST'):
 		email = request.form['email']
 		senha = request.form['password']
@@ -124,5 +135,7 @@ def login():
 		x = cur.fetchall()
 		for i in x:
 			if (i['email'] == email) and (i['senha'] == senha):
+				session['name'] = request.form['email']
 				return render_template('homecliente.html')
 	return render_template('login.html')
+

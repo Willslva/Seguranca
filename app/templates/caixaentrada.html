@@ -3,21 +3,14 @@
 
           <div style="float: center;">
           <h1> Histórico de Mensagens</h1>
-          {% for x in caixa %}
-              <table border="3">
-                <tr>
-                  <th>remetente</th>
-                  <th>destinatario</th>
-                  <th>mensagem</th>
-                </tr>
-                <tr>
-                   <td>{{ x['remetente']}}</td>
-                   <td>{{ x['destinatario']}}</td>
-                   <td>{{ x['mensagem']}}</td>
-                </tr>
-              </table>
-            {% endfor %}
+          <h2> Remetente</h2>
+          <h5>{{remetente}}</h5>
+          <h2> Mensagem</h2>
+          <h5>{{caixa}}</h5>
           </div>
+          <div style="float: right;">
+           <a href="/homecliente"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></a>
+           </div>
               
 
 {% endblock %}
